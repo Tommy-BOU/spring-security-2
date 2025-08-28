@@ -16,6 +16,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/cookie").permitAll()
+                        .requestMatchers("/create-jwt").permitAll()
                 )
                 .build();
     }

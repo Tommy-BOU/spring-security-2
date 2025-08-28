@@ -2,6 +2,7 @@ package fr.diginamic.spring_security_2;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
@@ -13,7 +14,7 @@ import java.util.Date;
 public class SpringSecurity2Application {
 
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException {
-//		SpringApplication.run(SpringSecurity2Application.class, args);
+		SpringApplication.run(SpringSecurity2Application.class, args);
 
         String secretKey = "maSuperCleSecrete123maSuperCleSecrete123";
         String message = "Voici une châine à signer";
