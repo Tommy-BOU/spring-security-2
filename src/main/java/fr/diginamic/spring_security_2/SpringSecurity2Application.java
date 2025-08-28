@@ -1,81 +1,105 @@
 package fr.diginamic.spring_security_2;
 
-import org.springframework.boot.SpringApplication;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.nio.charset.StandardCharsets;
+
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HexFormat;
-import java.util.List;
+import java.util.Date;
 
 @SpringBootApplication
 public class SpringSecurity2Application {
 
-    public static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-    public static List<String> prenoms = new ArrayList<>(List.of("Tommy", "Angeline", "Cyril", "Daris", "Dmitry", "Julien", "Laurence", "Matthieux", "Nuno", "Olivier", "Robin", "Sandrine", "Sarah"));
-
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException {
-		SpringApplication.run(SpringSecurity2Application.class, args);
+//		SpringApplication.run(SpringSecurity2Application.class, args);
 
-////		Partie 1
-//        for (String prenom : prenoms) {
-//            System.out.println(getHash(prenom));
-//        }
-//        System.out.println("----------------------------------------------------------------------------------------------------------------------");
-////		Partie 2
-//        for (String prenom : prenoms) {
-//            System.out.println(getSmallestNonceForHash(prenom));
-//        }
-//        System.out.println("----------------------------------------------------------------------------------------------------------------------");
-//
-////		Partie 3
-//        System.out.println(encoder.encode("Hello world"));
-//        String totohaseh = encoder.encode("toto");
-//        String newotohaseh = encoder.encode("toto");
-//        System.out.println(totohaseh);
-//        System.out.println(newotohaseh);
-//        System.out.println(encoder.matches("toto", totohaseh));
-//        System.out.println(encoder.matches("toto", newotohaseh));
-//        System.out.println("----------------------------------------------------------------------------------------------------------------------");
-//
-////		Partie 4
-//        String secretKey = "2025";
-//        String message = "Diginamic c'est chouette";
-//
-//        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
-//
-//        Mac mac = Mac.getInstance("HmacSHA256");
-//        mac.init(secretKeySpec);
-//
-//        byte[] hmacBytes = mac.doFinal(message.getBytes());
-//
-//        String hmacBase64 = Base64.getEncoder().encodeToString(hmacBytes);
-//        System.out.println("Signature HMAC-SHA256 (Base 64) : " + hmacBase64);
-    }
+        String secretKey = "maSuperCleSecrete123maSuperCleSecrete123";
+        String message = "Voici une châine à signer";
 
-    public static String getHash(String input) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-        String hex = HexFormat.of().formatHex(hash);
-        return (hex);
-    }
+        String jwt = Jwts.builder()
+                .setSubject("exemple")
+                .claim("message", message)
+                .setIssuedAt(new Date())
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+                .compact();
 
-    public static String getSmallestNonceForHash(String input) throws NoSuchAlgorithmException {
-        String neoHash = "";
-        int counter = 0;
-        while (neoHash.isEmpty()) {
-            String hash = getHash(input + counter);
-            if (hash.startsWith("0000")) {
-                neoHash = hash;
-            }
-            counter++;
+        System.out.println("JWT : " + jwt);
+
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey.getBytes())
+                .parseClaimsJws(jwt)
+                .getBody();
+
+        System.out.println("Message extrait du JWT : " + claims.get("message"));
+
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVtcGxlIiwibWVzc2FnZSI6IlZvaWNpIHVuZSBjaGHDrm5lIMOgIHNpZ25lciIsImlhdCI6MTc0NDgzMTMxNX0.VIBNB1C1j93PUDrbmFJwbJXXbTYNPwEGJbkEQHVZoYg";
+        String token2 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVtcGxlIiwibWVzc2FnZSI6IlZvaWNpIHVuZSBjaGHDrm5lIMOgIHNpZ25lciIsImlhdCI6MTc0NDgzMTYwNn0.UZ6IO0Wvrnd4NP63diYjyvkNFNWI1NfDGP9lpfJyJSE";
+        String token3 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVtcGxlIiwibWVzc2FnZSI6IlZvaWNpIHVuZSBjaGHDrm5lIMOgIHRpZ25lciIsImlhdCI6MTc0NDgzMTY0NX0.5vpcu1T7DmXDuoCBLhBJAQGE3HpNUO41-Tr0rkGrDY0";
+        String token4 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVtcGxlIiwibWVzc2FnZSI6IlZvaWNpIHVuZSBjaGHDrm5lIMOgIHNpZ25lciIsImlhdCI6MTc0NDgzMTY3OH0.NXvOGwyMKQ9tK2z5dR6ER5tbf2plLlkxgJnCQ0lI13g";
+        System.out.println(checkToken(token, secretKey));
+        System.out.println(checkToken(token2, secretKey));
+        System.out.println(checkToken(token3, secretKey));
+        System.out.println(checkToken(token4, secretKey));
+
+        String token5 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKZSBuZSBzYWlzIHBhcyIsIm1lc3NhZ2UiOiLDoCBtb2kgbcOqbWUiLCJtZXNzYWdlLWNhY2jDqSI6InRyYXZhaWxsZSwgw6dhIGZpbml0IHRvdWpvdXJzIHBhciBwYXllciIsImxodW1vdXIiOiJjJ2VzdCBpbXBvcnRhbnQiLCJpYXQiOjE3NDQ4MzE5MTV9.wdaFguIzdkNKgVaYmSg5jHgYCDenufwjlJEL7T42fLA";
+        String secretKey2 = "essayeDoncCetteChouetteCleSecreteOnVerraSiCaMarche";
+        String secretKey3 = "maToutAutantChouetteCleSecreteQueJeChoisiCommeJeVeux";
+        if (validateToken(token5, secretKey)) {
+            System.out.println(getTokenBody(token5, secretKey));
         }
-        return "Le nonce le plus petit qui donne un hash commençant par 0000 pour " + input + " est " + counter + "\n" + neoHash + "\n";
+        else if (validateToken(token5, secretKey2)){
+            System.out.println(getTokenBody(token5, secretKey2));
+        }
+        else if (validateToken(token5, secretKey3)){
+            System.out.println(getTokenBody(token5, secretKey3));
+        }
+    }
+
+    public static String checkToken(String token, String secretKey) {
+        String isValid = validateToken(token, secretKey) == true ? "valide" : "invalide";
+
+        if (isValid.equals("invalide")) return "Le token " + token + " est " + isValid;
+
+        Claims claims = getTokenBody(token, secretKey);
+
+        return "Le token " + token + " est " + isValid + " et contient le message : \n " + claims.get("message");
+    }
+
+    public static Claims getTokenBody(String token, String secretKey) {
+        return Jwts.parser()
+                .setSigningKey(secretKey.getBytes())
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public static boolean validateToken(String token, String secretKey) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token expiré");
+            return false;
+        } catch (UnsupportedJwtException e) {
+            System.out.println("Token non supporté");
+            return false;
+        } catch (MalformedJwtException e) {
+            System.out.println("Token mal formé");
+            return false;
+        } catch (SignatureException e) {
+            System.out.println("Signature invalide");
+            return false;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Token vide ou null");
+            return false;
+        } catch (Exception e) {
+            System.out.println("Erreur token");
+            return false;
+        }
     }
 
 }
